@@ -150,6 +150,22 @@ type structItem struct {
 	InArray     bool // If this struct node is within an array (and thus can always be added to).
 }
 
+func (si *structItem) String() string {
+	var parentType string
+	if si.Parent != nil {
+		parentType = si.Parent.Type.Name()
+	}
+
+	return fmt.Sprintf("StructItem{Index:%d, Parent:%s, LinkType:%s, Type:%s, Leaf:%t, InArray:%t, IsValid:%t}",
+		si.Index,
+		parentType,
+		si.LinkType.String(),
+		si.Type.Name(),
+		si.Leaf,
+		si.InArray,
+		si.present())
+}
+
 func (si *structItem) present() bool {
 	return present(si.ActiveValue)
 }
@@ -181,7 +197,8 @@ func (w *walker) digest(line int, v any) error {
 		if w.fullInArray(si) {
 			continue
 		}
-		return w.found(line, i, si, v, rv, rt)
+
+		return w.found(i, si, rv)
 	}
 	// If not found going forward, go backwards.
 	for i := w.last; i >= 0; i-- {
@@ -192,7 +209,8 @@ func (w *walker) digest(line int, v any) error {
 		if w.fullInArray(si) {
 			continue
 		}
-		return w.found(line, i, si, v, rv, rt)
+
+		return w.found(i, si, rv)
 	}
 
 	_, isControl := w.registry.ControlSegment(rt.Name())
@@ -204,9 +222,10 @@ func (w *walker) digest(line int, v any) error {
 }
 
 // Found creates the parent tree and sets it up.
-func (w *walker) found(line, index int, si *structItem, v any, rv reflect.Value, rt reflect.Type) error {
+func (w *walker) found(index int, si *structItem, rv reflect.Value) error {
 	w.last = index
-
+	t := si.Type.Name()
+	fmt.Println(t)
 	// fmt.Printf("found, %s\n", rv.Type())
 	currentList := []*structItem{}
 	current := si
@@ -233,6 +252,10 @@ func (w *walker) found(line, index int, si *structItem, v any, rv reflect.Value,
 		}
 		// All valid.
 		// Break if no list is needed or if a list has already been found.
+		if t == "OBR" && current.Type.Name() == "OML_O33_Order" {
+			findList = false
+		}
+
 		if !findList || hasList {
 			break
 		}
@@ -244,6 +267,10 @@ func (w *walker) found(line, index int, si *structItem, v any, rv reflect.Value,
 	}
 	if len(currentList) == 0 {
 		return fmt.Errorf("found, nothing in current list")
+	}
+
+	for i := len(currentList) - 1; i >= 0; i-- {
+		fmt.Println(i, currentList[i])
 	}
 
 	for i := len(currentList) - 1; i >= 0; i-- {
@@ -264,6 +291,7 @@ func (w *walker) found(line, index int, si *structItem, v any, rv reflect.Value,
 			set = rv
 		default:
 			set = reflect.New(c.Type)
+			fmt.Println("reflect new", c)
 		}
 		pv := c.Parent.ActiveValue.Field(c.Index)
 		switch c.LinkType {

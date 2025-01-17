@@ -4577,7 +4577,7 @@ type OML_O33_PriorResult struct {
 	PatientPrior      *OML_O33_PatientPrior      `hl7:",display=Patient Prior"`
 	PatientVisitPrior *OML_O33_PatientVisitPrior `hl7:",display=Patient Visit Prior"`
 	AL1               []AL1                      `hl7:"32,display=Patient Allergy Information"`
-	OrderPrior        []OML_O33_OrderPrior       `hl7:",required,display=Order Prior"`
+	//OrderPrior        []OML_O33_OrderPrior       `hl7:",required,display=Order Prior"`
 }
 
 // PatientPrior
