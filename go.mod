@@ -1,4 +1,4 @@
-module github.com/kardianos/hl7
+module github.com/caru4/hl7
 
 go 1.18
 
