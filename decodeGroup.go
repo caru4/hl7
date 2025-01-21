@@ -225,7 +225,6 @@ func (w *walker) digest(line int, v any) error {
 func (w *walker) found(index int, si *structItem, rv reflect.Value) error {
 	w.last = index
 	t := si.Type.Name()
-	fmt.Println(t)
 	// fmt.Printf("found, %s\n", rv.Type())
 	currentList := []*structItem{}
 	current := si
@@ -270,10 +269,6 @@ func (w *walker) found(index int, si *structItem, rv reflect.Value) error {
 	}
 
 	for i := len(currentList) - 1; i >= 0; i-- {
-		fmt.Println(i, currentList[i])
-	}
-
-	for i := len(currentList) - 1; i >= 0; i-- {
 		c := currentList[i]
 		if c.Parent == nil {
 			// The root value just needs to be created when found.
@@ -291,7 +286,6 @@ func (w *walker) found(index int, si *structItem, rv reflect.Value) error {
 			set = rv
 		default:
 			set = reflect.New(c.Type)
-			fmt.Println("reflect new", c)
 		}
 		pv := c.Parent.ActiveValue.Field(c.Index)
 		switch c.LinkType {
